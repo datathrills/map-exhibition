@@ -7,12 +7,101 @@
     <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
     <script src="/socket.io/socket.io.js"></script>
     <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&display=swap" rel="stylesheet">
+
+    <style>
+       
+        #main {
+            margin: 50px;
+            font-family: 'Roboto', sans-serif;
+            color: #333333;
+
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr ;
+            grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+            grid-gap: 50px;
+        }
+
+        .grayBlocks{
+            background-color: #edf5fc;
+
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-template-rows: 1fr 4fr;
+        }
+
+        .block-title{
+            grid-column-start: 1;
+            grid-column-end: 3;
+
+            padding-left: 10px;
+            padding-top: 5px;
+        }
+
+
+        .bold-letters{
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        
+        .bold-letters span {
+            color: #E84D4D;
+        }
+
+
+        /* FIRST BLOCK  */
+        #doubleBlock {
+            grid-column-start: 1;
+            grid-column-end: 2;
+            grid-row-start: 1;
+            grid-row-end: 3;
+        }
+
+        #title-cont {
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        #title-location{
+            font-size: 50px;
+            margin-top: -5px;
+        }
+
+        #icon-con {
+            margin-left: 50px;
+            margin-right: 50px;
+        }
+
+        /* AGE BLOCK */
+
+        #hair-icon {
+
+        }
+
+    
+    </style>
     
     <script>
         var socket = io();
         
-        socket.on('message', function(msg){
-            $('#messages').append("<p>"+msg+"</p>");
+        socket.on('server_data', function(data){
+            $('#title-location').text(data.name);
+
+            const iconSVG = iconGenerator(data.name, data.population, data.age, data.birthPlace, data.unemp, data.soc, data.edu, data.commuting, data.health, data.mar_index, data.id, data.number_joins);
+
+            $('#icon-con').append(iconSVG);
+
+            const haircolorValue = 'rgb('+ (data.age-20) *(277/73) +', '+ (data.age-20)*(277/73) +', '+ (data.age-20)*(277/73) +')';
+
+            // const hairSVGview = ' viewBox="14 0 75 60" '
+            // const hairSVG = '<svg'+hairSVGview+' width="90px" height="130"><path id="hair" fill="'+ haircolorValue +'" d="M42.8,28.9c0,0,8.3,5.5,14.2,7.3c5.9,1.7,16.4,4.1,19.5,5.6c3,1.5,4.6,4,5.5,7c1,3.2,1.1,6.3,1.1,6.3 s2.6-3.2,3.4-8.9c1.1-8,2.4-28.3-16-34.3s-27.6,3.6-27.6,3.6s-8.3-0.8-13.4,10.6c-2.8,6.3-3,11.7-2.3,18c0.7,6.1,3.5,10.4,3.5,10.4 S34.5,35.8,42.8,28.9z"/><svg>';
+
+            const hardcodedHair = '<svg version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 451.7 181.1" enable-background="new 0 0 451.7 181.1" xml:space="preserve"> <rect x="3" fill="#F2F2F2" width="448" height="181"/><g><g><text transform="matrix(1 0 0 1 28.2994 29.59)"><tspan x="0" y="0" fill="#333333" font-size="24">AVERAGE AGE: </tspan><tspan x="172.7" y="0" fill="#E84D4D" font-size="24">'+Math.round(data.age)+'</tspan></text></g><linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="195.553" y1="114.2267" x2="416.3322" y2="114.2267"><stop  offset="0" style="stop-color:#000000"/><stop  offset="1" style="stop-color:#C9C9C9"/></linearGradient><rect x="195.6" y="101.3" fill="url(#SVGID_1_)" width="220.8" height="25.8"/><polygon fill="#E84D4D" points="263.7,132.4 254.3,152 273.9,152 	"/><path id="Hair_2_" fill="' + haircolorValue + '" d="M64.5,102.6c0,0,15.6,10.4,26.6,13.6c11,3.2,30.7,7.7,36.6,10.5c5.6,2.7,8.5,7.5,10.3,13.1 c1.8,6,2.1,11.7,2.1,11.7s4.9-6,6.4-16.7c2.1-15,4.6-52.9-29.9-64.1s-51.7,6.7-51.7,6.7s-15.5-1.5-25,19.9 c-5.3,11.8-5.6,22-4.3,33.8c1.3,11.5,6.5,19.5,6.5,19.5S49.1,115.4,64.5,102.6z"/></g></svg>'
+
+            $('#hair-icon').append(hardcodedHair);
+
+
         });
 
     </script>
@@ -20,8 +109,88 @@
 </head>
 
 <body>
-    <div>Test</div>
-    <div id="messages"></div>
+
+    <div id="main">
+        
+        <div id="doubleBlock">
+            <div id="title-cont">
+                <div id="title-prefix" class="bold-letters">Data for</div>
+                <div id="title-location">Montjoy B</div>
+            </div>
+            <div id="icon-con"></div>
+        </div>
+
+        <div id="ageBlock" class="">
+            <!-- <div id="age-title" class="bold-letters block-title">AVERAGE AGE: <span id="age-data">30</span><span>%</span></div> -->
+            <div id="hair-icon" class="body-part"></div>
+
+        </div>
+
+
+
+
+        
+    </div>
+
+    <script>
+
+        function iconGenerator(name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, id, number_joins){
+
+            //temp
+            const educationValue =  0.21 + edu * 0.05;
+            const unemploymentValue = unemp / 42;
+            const haircolorValue = 'rgb('+ (age-20) *(277/73) +', '+ (age-20)*(277/73) +', '+ (age-20)*(277/73) +')';
+            const eyeBagsScale = (edu <40)?1:((edu>59)?1.55:((edu*2.65)/100));
+            const eyeBagsValue = commuting / 6;
+            const number_text = (number_joins>0)?number_joins:"";
+            const center_text = 54.4978 - (2.5019 * number_joins.toString().length);
+
+            const val_r = 2.4;
+            const val_g = 1.13;
+            const val_b = 1.9;
+
+            const bodycolorValue = 'rgb('+ Math.round(((99 * val_r)+24) - (birthPlace*val_r)) +', 109, 44)';
+
+            const collar_colors = ["#F7F7F7", "#88B9E2", "#265E8C"];
+
+            const svg = '<svg id="'+ id +'" class="picto" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 114 131.3" enable-background="new 0 0 114 131.3" xml:space="preserve">';
+
+            const body = '<path id="body" fill="'+bodycolorValue+'" d="M10.8,121v-16.9c0-32,30.1-28.1,30.1-28.1h33.6c0,0,29.3-3.9,29.3,28.1V121H10.8z"/>';
+
+            const collar = '<g id="collar"><path fill="'+collar_colors[soc]+'" d="M38.9,71l-4.4,3.7L45,92.4l12.1-12.5C57.1,79.9,45.4,79.7,38.9,71z"/><path fill="'+collar_colors[soc]+'" d="M75.1,71l4.4,3.7L69,92.4L56.9,79.9C56.9,79.9,68.6,79.7,75.1,71z"/></g>';
+
+            const face = '<ellipse id="Face_11_" fill="#E5D6BD" cx="57" cy="47.5" rx="26.9" ry="32.8"/>';
+
+            const cheeks = '<g id="cheeks"><ellipse id="cheek_l" transform="matrix(0.9643 0.2647 -0.2647 0.9643 16.5147 -8.7475)" opacity="'+ health +'" fill="#F4A2BC" cx="40.7" cy="56.9" rx="7.3" ry="6.2"/> <ellipse id="cheek_r" transform="matrix(-0.9643 0.2647 -0.2647 -0.9643 159.014 92.3913)" opacity="'+ health +'" fill="#F4A2BC" cx="73.3" cy="56.9" rx="7.3" ry="6.2"/></g>';
+
+            const beard = '<g id="beard" opacity="'+ unemploymentValue +'"><circle fill="#848484" cx="37.6" cy="68.4" r="0.5"/><circle fill="#848484" cx="40.7" cy="68.4" r="0.5"/><circle fill="#848484" cx="40.7" cy="71.5" r="0.5"/><circle fill="#848484" cx="43.8" cy="69.2" r="0.5"/><circle fill="#848484" cx="44.6" cy="66.1" r="0.5"/><circle fill="#848484" cx="46.9" cy="69.2" r="0.5"/><circle fill="#848484" cx="44.6" cy="72.3" r="0.5"/><circle fill="#848484" cx="48.5" cy="72.3" r="0.5"/><circle fill="#848484" cx="46.1" cy="74.6" r="0.5"/><circle fill="#848484" cx="50" cy="74.6" r="0.5"/><circle fill="#848484" cx="50" cy="76.9" r="0.5"/><circle fill="#848484" cx="53.1" cy="75.4" r="0.5"/><circle fill="#848484" cx="54.7" cy="78.5" r="0.5"/><circle fill="#848484" cx="38.4" cy="65.3" r="0.5"/><circle fill="#848484" cx="35.3" cy="63.7" r="0.5"/><circle fill="#848484" cx="56.2" cy="76.1" r="0.5"/><circle fill="#848484" cx="74.1" cy="69.2" r="0.5"/><circle fill="#848484" cx="71" cy="69.2" r="0.5"/><circle fill="#848484" cx="71" cy="72.3" r="0.5"/><circle fill="#848484" cx="67.9" cy="69.9" r="0.5"/><circle fill="#848484" cx="67.1" cy="66.8" r="0.5"/><circle fill="#848484" cx="64.8" cy="69.9" r="0.5"/><circle fill="#848484" cx="67.1" cy="73" r="0.5"/><circle fill="#848484" cx="63.2" cy="73" r="0.5"/><circle fill="#848484" cx="65.5" cy="75.4" r="0.5"/><circle fill="#848484" cx="61.7" cy="75.4" r="0.5"/><circle fill="#848484" cx="61.7" cy="77.7" r="0.5"/><circle fill="#848484" cx="58.6" cy="76.1" r="0.5"/><circle fill="#848484" cx="57" cy="79.2" r="0.5"/><circle fill="#848484" cx="73.3" cy="66.1" r="0.5"/><circle fill="#848484" cx="76.4" cy="64.5" r="0.5"/><circle fill="#848484" cx="78.7" cy="62.2" r="0.5"/></g>';
+
+            const eyes = '<g id="eyes"><circle id="eye_l" fill="#6D6D6D" stroke="#E5D6BD" cx="47.3" cy="47.5" r="'+ educationValue +'"/><circle id="eye_r" fill="#6D6D6D" stroke="#E5D6BD" cx="66.7" cy="47.5" r="'+ educationValue +'"/></g>';
+
+            const eyeBags = '<g id="eyeBags"><path transform="scale(' + eyeBagsScale + ')" transform-origin="47.3px 47.5px" id="bag_l" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="' + eyeBagsValue + '" stroke-miterlimit="10" d="M51.1,47.3 c0,2-1.7,3.8-3.8,3.8s-3.8-1.8-3.8-3.8"/> <path transform="scale(' + eyeBagsScale + ')" transform-origin="66.7px 47.5px" id="bag_r" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="' + eyeBagsValue + '" stroke-miterlimit="10" d="M70.5,47.3 c0,2-1.7,3.8-3.8,3.8c-2.1,0-3.8-1.8-3.8-3.8"/></g>';
+
+            const mouth_smile = '<path transform="scale(1,'+mar_index+')" transform-origin="57px 71px" id="mouth" fill="#6D6D6D" d="M65.8,65c0,4-3.9,8.8-8.8,8.8S48.2,69,48.2,65H65.8z"/>';
+
+            const mouth_line = '<path id="mouth" opacity="0.6" stroke-width="0.8" fill="#6D6D6D" stroke="#231F20" stroke-miterlimit="10" d="M64.1,70.5H49.3H64.1z"/>'
+
+            const hair = '<path id="hair" fill="'+ haircolorValue +'" d="M42.8,28.9c0,0,8.3,5.5,14.2,7.3c5.9,1.7,16.4,4.1,19.5,5.6c3,1.5,4.6,4,5.5,7c1,3.2,1.1,6.3,1.1,6.3 s2.6-3.2,3.4-8.9c1.1-8,2.4-28.3-16-34.3s-27.6,3.6-27.6,3.6s-8.3-0.8-13.4,10.6c-2.8,6.3-3,11.7-2.3,18c0.7,6.1,3.5,10.4,3.5,10.4 S34.5,35.8,42.8,28.9z"/>';
+
+            const background = '<path id="joined" fill="#D3F935" d="M0.8,131v-26.9c0-18.6,8.7-31.5,23.8-36.3c-1.4-3-2.5-6.2-3.2-9.5c-1.3-2.5-3.3-7-4-12.9 c-0.7-6.4-0.9-14.3,3.1-23.3C25,11.8,32.5,7.1,39,5.9C42.7,3.3,49.4,0,58.9,0c4.7,0,9.7,0.8,14.7,2.5c17.7,5.7,26,22.2,22.8,45.2 c-0.7,5.2-2.5,9.1-3.9,11.4c-0.7,3-1.7,5.9-3,8.6c13,4,24.2,15,24.2,36.4V131H0.8z"/>';
+
+            const text = '<text id="number" transform="matrix(1 0 0 1 ' + center_text + ' 128.75)" fill="#383838" font-size="9">' + number_text + '</text>';
+
+            const joins = (number_joins>0)?background:"";
+            const mouth_gen = ((mar_index<-0.01)||(mar_index>0.01))?mouth_smile:mouth_line;
+
+            //console.log(mar_index);
+
+            var el = document.createElement('div');
+            el.innerHTML = svg + joins + text + body + collar + face + cheeks + beard + eyes + eyeBags + mouth_gen + hair + '</svg>';
+            return el.firstChild;
+
+        }
+
+    </script>
 
 </body>
 </html>

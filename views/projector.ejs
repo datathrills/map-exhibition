@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>mapboxgl.js + d3.js tutorial - 01</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    
+    <script>
+        var socket = io();
+
+        socket.on('chat message', function(msg){
+      $('#messages').append($('<li>').text(msg));
+    });
+
+    </script>
+
+</head>
+
+<body>
+    <div id="messages"></div>
+
+</body>
+</html>

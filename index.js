@@ -24,9 +24,8 @@ io.on('connection', function(socket){
         console.log('user disconnected');
     });
 
-    socket.on('data', function(msg){
-        console.log('message: ' + msg);
-        io.emit('message', msg);
+    socket.on('data', function(dataObject){
+        io.emit('server_data', dataObject);
     });
 });
 
