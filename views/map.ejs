@@ -43,9 +43,9 @@
     <script>
         var socket = io();
 
-        function generate(type, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, id, number_joins, educationValue, unemploymentValue, eyeBagsValue){
+        function generate(type, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, mar_factor, id, number_joins, educationValue, unemploymentValue, eyeBagsValue){
                         
-            socket.emit('data', {type, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, id, number_joins, educationValue, unemploymentValue});
+            socket.emit('data', {type, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, mar_factor, id, number_joins, educationValue, unemploymentValue});
             
             return false
         }
@@ -111,6 +111,21 @@
 
         var no_data_MAR = ["==", ["get", "MAR_INDEX"], "NaN"];
         var yes_data_MAR = ["!=", ["get", "MAR_INDEX"], "NaN"];
+
+        //Change calculations
+        var index_0 = ["==", ["get", "MAX_INDEX_FACTOR"], "0"];
+        var index_1 = ["==", ["get", "MAX_INDEX_FACTOR"], "1"];
+        var index_2 = ["==", ["get", "MAX_INDEX_FACTOR"], "2"];
+        var index_3 = ["==", ["get", "MAX_INDEX_FACTOR"], "3"];
+        var index_4 = ["==", ["get", "MAX_INDEX_FACTOR"], "4"];
+        var index_5 = ["==", ["get", "MAX_INDEX_FACTOR"], "5"];
+        var index_6 = ["==", ["get", "MAX_INDEX_FACTOR"], "6"];
+        var index_7 = ["==", ["get", "MAX_INDEX_FACTOR"], "7"];
+        var index_8 = ["==", ["get", "MAX_INDEX_FACTOR"], "8"];
+        var index_9 = ["==", ["get", "MAX_INDEX_FACTOR"], "9"];
+        var index_10 = ["==", ["get", "MAX_INDEX_FACTOR"], "10"];
+        var index_11 = ["==", ["get", "MAX_INDEX_FACTOR"], "11"];
+        var index_12 = ["==", ["get", "MAX_INDEX_FACTOR"], "12"];
         
 
         // colors to use for the categories
@@ -150,7 +165,23 @@
                     "num_no_data_MAR": ["+", ["case", no_data_MAR, 1, 0]],
                     "num_added_data_MAR": ["+", ["case", yes_data_MAR, ["to-number", ["get", "MAR_INDEX"]], 0]],
 
-                    "num_POPULATION": ["+", ["get", "POPULATION_NUMBER"]]
+                    "num_POPULATION": ["+", ["get", "POPULATION_NUMBER"]],
+
+                    "num_index_0": ["+", ["case", index_0, 1, 0]],
+                    "num_index_1": ["+", ["case", index_1, 1, 0]],
+                    "num_index_2": ["+", ["case", index_2, 1, 0]],
+                    "num_index_3": ["+", ["case", index_3, 1, 0]],
+                    "num_index_4": ["+", ["case", index_4, 1, 0]],
+                    "num_index_5": ["+", ["case", index_5, 1, 0]],
+                    "num_index_6": ["+", ["case", index_6, 1, 0]],
+                    "num_index_7": ["+", ["case", index_7, 1, 0]],
+                    "num_index_8": ["+", ["case", index_8, 1, 0]],
+                    "num_index_9": ["+", ["case", index_9, 1, 0]],
+                    "num_index_10": ["+", ["case", index_10, 1, 0]],
+                    "num_index_11": ["+", ["case", index_11, 1, 0]],
+                    "num_index_12": ["+", ["case", index_12, 1, 0]]
+
+
 
                 }
             });
@@ -182,7 +213,7 @@
                     if (!props.cluster) {
 
                         
-                        var collar_codes = ["collar_W", "collar_LB", "collar_B", "collar_LB_B", "collar_W_B", "collar_W_LB","num_collar_NONE"];
+                        var collar_codes = ["collar_W", "collar_LB", "collar_B", "collar_LB_B", "collar_W_B", "collar_W_LB","collar_NONE"];
 
                         //data
                         var isCluster = false;
@@ -199,13 +230,14 @@
                         var health = props.HEALTH;
 
                         var mar_index = Number(props.MAR_INDEX);
+                        var mar_factor = Number(props.MAX_INDEX_FACTOR);
                         
                         var id = "S" + props.OBJECTID;
                         var marker = markers[id];
 
 
                         if (!marker) {
-                            var el = createPicto(isCluster, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, id, 0);
+                            var el = createPicto(isCluster, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, mar_factor, id, 0);
                             
                             marker = markers[id] = new mapboxgl.Marker({
                                 element: el
@@ -242,10 +274,14 @@
                         var mar_no_index = props.num_no_data_MAR; // Number of points with no data
                         var mar_index = props.num_added_data_MAR / (props.point_count - mar_no_index); // Average MAR Index
 
+                        var mar_factor_array = [props.num_index_0, props.num_index_1, props.num_index_2, props.num_index_3, props.num_index_4, props.num_index_5, props.num_index_6, props.num_index_7, props.num_index_8, props.num_index_9, props.num_index_10, props.num_index_11, props.num_index_12];
+                        var index_of_mar_factor = mar_factor_array.reduce((iMax, x, i, arr) => x > arr[iMax] ? i : iMax, 0); // Mode of factors
+
+
                         var marker = markers[id]; // Is this ID in markers array?
                         
                         if (!marker) {
-                            var el = createPicto(isCluster, name, population, age, birthPlace, unemp, index_of_soc, edu, commuting, health, mar_index, id, props.point_count);
+                            var el = createPicto(isCluster, name, population, age, birthPlace, unemp, index_of_soc, edu, commuting, health, mar_index, mar_factor, id, props.point_count);
                             marker = markers[id] = new mapboxgl.Marker({
                                 element: el
                             }).setLngLat(coords);
@@ -299,16 +335,18 @@
 
 
         // Main function for building people-icons
-        function createPicto(isCluster, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, id, number_joins){
+        function createPicto(isCluster, name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, mar_factor, id, number_joins){
 
             //temp
             const educationValue =  0.21 + edu * 0.05;
-            const unemploymentValue = unemp / 42;
+            const unemploymentValue = 1 + (Math.log((unemp / 42)+0.3));
             const haircolorValue = 'rgb('+ (age-20) *(277/73) +', '+ (age-20)*(277/73) +', '+ (age-20)*(277/73) +')';
             const eyeBagsScale = (edu <40)?1:((edu>59)?1.55:((edu*2.65)/100));
             const eyeBagsValue = commuting / 6;
             const number_text = (number_joins>0)?number_joins:"";
             const center_text = 54.4978 - (2.5019 * number_joins.toString().length);
+            const healthValue = (health>=80)?(((health-80)/(100-(health-80))) * 100) * 0.04:1 - ((((health-45)/(100-(health-45))) * 100) * 0.02);
+            const healthColor = (health>=80)?'#F4A2BC':'#7FFF80';
 
             const val_r = 2.4;
             const val_g = 1.13;
@@ -316,19 +354,20 @@
 
             const bodycolorValue = 'rgb('+ Math.round(((99 * val_r)+24) - (birthPlace*val_r)) +', 109, 44)';
 
-
+            const collarLeft = (soc==0 || (soc==4 || soc==5 ))?'#F7F7F7':((soc==1 || soc==3)?'#88B9E2':((soc==2)?'#265E8C':'none" stroke-dasharray="4 2" stroke="#515151'));
+            const collarRight = (soc==0)?'#F7F7F7':((soc==1 || soc==5)?'#88B9E2':((soc==2 || (soc==3 || soc==4))?'#265E8C':'none" stroke-dasharray="4 2" stroke="#515151'));
 
             const collar_colors = ["#F7F7F7", "#88B9E2", "#265E8C"];
 
-            const svg = '<svg onclick="generate('+ isCluster + ',' + name + ',' + population + ',' + age + ',' + birthPlace + ',' + unemp + ',' + soc + ',' + edu + ',' + commuting + ',' + health + ',' + mar_index + ',' + id + ',' + number_joins + ',' + educationValue + ',' + unemploymentValue + ',' + eyeBagsValue + ')" id="'+ id + '" class="picto" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 114 131.3" enable-background="new 0 0 114 131.3" xml:space="preserve">';
+            const svg = '<svg onclick="generate('+ isCluster + ',\'' + name + '\',' + population + ',' + age + ',' + birthPlace + ',' + unemp + ',' + soc + ',' + edu + ',' + commuting + ',' + health + ',' + mar_index + ',' + mar_factor + ',' + id + ',' + number_joins + ',' + educationValue + ',' + unemploymentValue + ',' + eyeBagsValue + ')" id="'+ id + '" class="picto" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 114 131.3" enable-background="new 0 0 114 131.3" xml:space="preserve">';
 
             const body = '<path id="body" fill="'+bodycolorValue+'" d="M10.8,121v-16.9c0-32,30.1-28.1,30.1-28.1h33.6c0,0,29.3-3.9,29.3,28.1V121H10.8z"/>';
 
-            const collar = '<g id="collar"><path fill="'+collar_colors[soc]+'" d="M38.9,71l-4.4,3.7L45,92.4l12.1-12.5C57.1,79.9,45.4,79.7,38.9,71z"/><path fill="'+collar_colors[soc]+'" d="M75.1,71l4.4,3.7L69,92.4L56.9,79.9C56.9,79.9,68.6,79.7,75.1,71z"/></g>';
+            const collar = '<g id="collar"><path fill="'+collarLeft+'" d="M38.9,71l-4.4,3.7L45,92.4l12.1-12.5C57.1,79.9,45.4,79.7,38.9,71z"/><path fill="'+collarRight+'" d="M75.1,71l4.4,3.7L69,92.4L56.9,79.9C56.9,79.9,68.6,79.7,75.1,71z"/></g>';
 
             const face = '<ellipse id="Face_11_" fill="#E5D6BD" cx="57" cy="47.5" rx="26.9" ry="32.8"/>';
 
-            const cheeks = '<g id="cheeks"><ellipse id="cheek_l" transform="matrix(0.9643 0.2647 -0.2647 0.9643 16.5147 -8.7475)" opacity="'+ health +'" fill="#F4A2BC" cx="40.7" cy="56.9" rx="7.3" ry="6.2"/> <ellipse id="cheek_r" transform="matrix(-0.9643 0.2647 -0.2647 -0.9643 159.014 92.3913)" opacity="'+ health +'" fill="#F4A2BC" cx="73.3" cy="56.9" rx="7.3" ry="6.2"/></g>';
+            const cheeks = '<g id="cheeks"><ellipse id="cheek_l" transform="matrix(0.9643 0.2647 -0.2647 0.9643 16.5147 -8.7475)" opacity="'+ healthValue + '" fill="' + healthColor + '" cx="40.7" cy="56.9" rx="7.3" ry="6.2"/> <ellipse id="cheek_r" transform="matrix(-0.9643 0.2647 -0.2647 -0.9643 159.014 92.3913)" opacity="' + healthValue + '" fill="' + healthColor + '" cx="73.3" cy="56.9" rx="7.3" ry="6.2"/></g>';
 
             const beard = '<g id="beard" opacity="'+ unemploymentValue +'"><circle fill="#848484" cx="37.6" cy="68.4" r="0.5"/><circle fill="#848484" cx="40.7" cy="68.4" r="0.5"/><circle fill="#848484" cx="40.7" cy="71.5" r="0.5"/><circle fill="#848484" cx="43.8" cy="69.2" r="0.5"/><circle fill="#848484" cx="44.6" cy="66.1" r="0.5"/><circle fill="#848484" cx="46.9" cy="69.2" r="0.5"/><circle fill="#848484" cx="44.6" cy="72.3" r="0.5"/><circle fill="#848484" cx="48.5" cy="72.3" r="0.5"/><circle fill="#848484" cx="46.1" cy="74.6" r="0.5"/><circle fill="#848484" cx="50" cy="74.6" r="0.5"/><circle fill="#848484" cx="50" cy="76.9" r="0.5"/><circle fill="#848484" cx="53.1" cy="75.4" r="0.5"/><circle fill="#848484" cx="54.7" cy="78.5" r="0.5"/><circle fill="#848484" cx="38.4" cy="65.3" r="0.5"/><circle fill="#848484" cx="35.3" cy="63.7" r="0.5"/><circle fill="#848484" cx="56.2" cy="76.1" r="0.5"/><circle fill="#848484" cx="74.1" cy="69.2" r="0.5"/><circle fill="#848484" cx="71" cy="69.2" r="0.5"/><circle fill="#848484" cx="71" cy="72.3" r="0.5"/><circle fill="#848484" cx="67.9" cy="69.9" r="0.5"/><circle fill="#848484" cx="67.1" cy="66.8" r="0.5"/><circle fill="#848484" cx="64.8" cy="69.9" r="0.5"/><circle fill="#848484" cx="67.1" cy="73" r="0.5"/><circle fill="#848484" cx="63.2" cy="73" r="0.5"/><circle fill="#848484" cx="65.5" cy="75.4" r="0.5"/><circle fill="#848484" cx="61.7" cy="75.4" r="0.5"/><circle fill="#848484" cx="61.7" cy="77.7" r="0.5"/><circle fill="#848484" cx="58.6" cy="76.1" r="0.5"/><circle fill="#848484" cx="57" cy="79.2" r="0.5"/><circle fill="#848484" cx="73.3" cy="66.1" r="0.5"/><circle fill="#848484" cx="76.4" cy="64.5" r="0.5"/><circle fill="#848484" cx="78.7" cy="62.2" r="0.5"/></g>';
 
