@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8" />
+    <title>mapboxgl.js + d3.js tutorial - 01</title>
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <link href="https://fonts.googleapis.com/css?family=Roboto:400,900&display=swap" rel="stylesheet">
+    <style>
+       
+        #main {
+            margin: 50px;
+            font-family: 'Roboto', sans-serif;
+            color: #333333;
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr ;
+            grid-template-rows: 100px 100px 100px 100px 100px;
+            grid-gap: 50px;
+        }
+
+        .grayBlocks{
+            background-color: #edf5fc;
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            grid-template-rows: 1fr 4fr;
+        }
+
+        .block-title{
+            grid-column-start: 1;
+            grid-column-end: 3;
+            padding-left: 10px;
+            padding-top: 5px;
+        }
+
+        .bold-letters{
+            font-size: 24px;
+            font-weight: 900;
+            text-transform: uppercase;
+        }
+        
+        .bold-letters span {
+            color: #E84D4D;
+        }
+
+        .picto {
+            width: 100px;
+            height: 100px;
+        }
+
+        /* FIRST BLOCK  */
+        #doubleBlock {
+            grid-column-start: 1;
+            grid-column-end: 2;
+            grid-row-start: 1;
+            grid-row-end: 3;
+        }
+
+        #title-cont {
+            text-transform: uppercase;
+            font-weight: 900;
+        }
+
+        #title-location{
+            font-size: 50px;
+            margin-top: -5px;
+        }
+
+        #icon-con {
+            margin-left: 50px;
+            margin-right: 50px;
+        }
+
+        /* ICON BLOCK */
+        #hairBlock {
+            grid-column-start: 2;
+            grid-column-end: 3;
+            grid-row-start: 1;
+            grid-row-end: 2;
+        }
+
+        #cheekBlock {
+            grid-column-start: 2;
+            grid-column-end: 3;
+            grid-row-start: 2;
+            grid-row-end: 3;
+        }
+
+        #beardBlock {
+            grid-column-start: 2;
+            grid-column-end: 3;
+            grid-row-start: 3;
+            grid-row-end: 4;
+        }
+
+        #collarBlock {
+            grid-column-start: 2;
+            grid-column-end: 3;
+            grid-row-start: 4;
+            grid-row-end: 5;
+        }
+
+        #shirtBlock {
+            grid-column-start: 2;
+            grid-column-end: 3;
+            grid-row-start: 5;
+            grid-row-end: 6;
+        }
+
+        #eyeBlock {
+            grid-column-start: 1;
+            grid-column-end: 2;
+            grid-row-start: 3;
+            grid-row-end: 4;
+        }
+
+        #eyebagBlock {
+            grid-column-start: 1;
+            grid-column-end: 2;
+            grid-row-start: 4;
+            grid-row-end: 5;
+        }
+
+        #mouthBlock {
+            grid-column-start: 1;
+            grid-column-end: 2;
+            grid-row-start: 5;
+            grid-row-end: 6;
+        }
+
+    </style>
+    
+    <script>
+        var socket = io();
+        socket.on('server_data', function(data){
+
+            $('#title-location').text(data.name);
+            const iconSVG = iconGenerator(data.name, data.population, data.age, data.birthPlace, data.unemp, data.soc, data.edu, data.commuting, data.health, data.mar_index, data.id, data.number_joins);
+            $('#icon-con').append(iconSVG);
+
+            //ViewBox size control the size of the
+            const viewBox_x = 448 * 1.5;
+            const viewBox_y = 181 * 1.5;
+            const viewBox = '0 0 '+ viewBox_x+' '+ viewBox_y;
+
+            // Hair Color for Age
+            const haircolorValue = 'rgb('+ (data.age-20) *(277/73) +', '+ (data.age-20)*(277/73) +', '+ (data.age-20)*(277/73) +')';
+            const hairPointerValue = ((data.age-20)/(73-(data.age-20))) * 220;
+
+            const hardcodedHair = '<svg  id="#hairBlock" class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" xml:space="preserve"><rect fill="#F2F2F2" width="448" height="181"/><g><g><text transform="matrix(1 0 0 1 25.2994 29.59)"><tspan x="0" y="0" fill="#333333" font-size="24">AVERAGE AGE: </tspan><tspan x="172.7" y="0" fill="#E84D4D" font-size="24">' + Math.round(data.age) +'</tspan></text></g><linearGradient id="SVGID_1_" gradientUnits="userSpaceOnUse" x1="192.553" y1="114.2267" x2="413.3322" y2="114.2267"><stop  offset="0" style="stop-color:#000000"/><stop  offset="1" style="stop-color:#C9C9C9"/></linearGradient><rect x="192.6" y="101.3" fill="url(#SVGID_1_)" width="220.8" height="25.8"/><polygon id="pointerHair" fill="#E94D4E" points="192.7,132.4 183.3,152 202.9,152 	"/><path id="Hair_2_" fill="' + haircolorValue + '" d="M61.5,102.6c0,0,15.6,10.4,26.6,13.6c11,3.2,30.7,7.7,36.6,10.5c5.6,2.7,8.5,7.5,10.3,13.1 c1.8,6,2.1,11.7,2.1,11.7s4.9-6,6.4-16.7c2.1-15,4.6-52.9-29.9-64.1s-51.7,6.7-51.7,6.7s-15.5-1.5-25,19.9 c-5.3,11.8-5.6,22-4.3,33.8c1.3,11.5,6.5,19.5,6.5,19.5S46.1,115.4,61.5,102.6z"/></g></svg>'
+            $('#hair-icon').append(hardcodedHair);
+            $('#pointerHair').css("transform", "translate("+hairPointerValue+"px)");
+
+            // Cheek Color for Health
+            const cheekopacityValue = (data.health>=80)?(((data.health-80)/(100-(data.health-80))) * 100) * 0.04:1 - ((((data.health-45)/(100-(data.health-45))) * 100) * 0.02);
+            const cheekcolorValue = (data.health>=80)?'#F4A2BC':'#7FFF80';
+            const cheekPointerValue = ((data.health-45)/(100-(data.health-45))) * 220;
+
+            const hardcodedCheeks = '<svg class="bold-letters" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" version="1.1" id="Layer_1" x="0px" y="0px" viewBox="'+ viewBox +'" enable-background="new 0 0 448 181" xml:space="preserve"><rect y="0" fill="#F2F2F2" width="448" height="181"/><g><g><rect x="25.8" y="12.2" fill="none" width="414.1" height="57.4"/><text transform="matrix(1 0 0 1 25.7637 30.1517)"><tspan x="0" y="0" fill="#333333" font-size="24">PERCENTAGE OF PEOPLE FEELING </tspan><tspan x="0" y="28.8" fill="#333333" font-size="24">HEALTHY &amp; VERY HEALTHY: </tspan><tspan x="320.7" y="28.8" fill="#E84D4D" font-size="24">'+ Math.round(data.health) +'%</tspan></text></g><g><linearGradient id="SVGID_2_" gradientUnits="userSpaceOnUse" x1="193.603" y1="113.2931" x2="412.3798" y2="113.2931"><stop  offset="0" style="stop-color:#7FFF80"/><stop  offset="0.5556" style="stop-color:#FFD4E9"/><stop  offset="1" style="stop-color:#FF6A97"/></linearGradient><rect x="193.6" y="100.4" fill="url(#SVGID_2_)" width="218.8" height="25.8"/><polygon id="pointerCheeks" fill="#E84D4D" points="193.6,131.4 184.2,151 203.8,151 		"/></g><ellipse id="cheek_x5F_l_3_" transform="matrix(0.9643 0.2647 -0.2647 0.9643 32.1042 -11.1336)" opacity="'+cheekopacityValue+'" fill="'+cheekcolorValue+'" cx="57.4" cy="113.6" rx="13.7" ry="11.6"/><ellipse id="cheek_x5F_r_2_" transform="matrix(-0.9643 0.2647 -0.2647 -0.9643 262.4799 191.7626)" opacity="'+cheekopacityValue+'" fill="'+cheekcolorValue+'" cx="118.3" cy="113.6" rx="13.7" ry="11.6"/></g></svg>'
+            $('#cheek-icon').append(hardcodedCheeks);
+            $('#pointerCheeks').css("transform", "translate("+cheekPointerValue+"px)");
+
+            // Beard for Employment
+            const beardValue = 1 + (Math.log((data.unemp / 42)+0.3));
+            const beardPointerValue = ((data.unemp)/(44-(data.unemp))) * 220;
+
+            const hardcodedBeard = '<svg class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" xml:space="preserve"><rect y="0.5" fill="#F2F2F2" width="448" height="181"/><g><rect x="28.8" y="23.7" fill="none" width="383.8" height="22.5"/><text transform="matrix(1 0 0 1 28.7637 41.7051)"><tspan x="0" y="0" fill="#333333" font-size="24">UNEMPLOYMENT RATE: </tspan><tspan x="273.7" y="0" fill="#E84D4D" font-size="24">' + Math.round(data.unemp) + '%</tspan></text></g><g><g id="beard_1_" opacity="'+beardValue+'"><circle fill="#848484" cx="54.9" cy="112.4" r="1"/><circle fill="#848484" cx="60.7" cy="112.4" r="1"/><circle fill="#848484" cx="60.7" cy="118.2" r="1"/><circle fill="#848484" cx="66.5" cy="113.8" r="1"/><circle fill="#848484" cx="67.9" cy="108" r="1"/><circle fill="#848484" cx="72.3" cy="113.8" r="1"/><circle fill="#848484" cx="67.9" cy="119.6" r="1"/><circle fill="#848484" cx="75.2" cy="119.6" r="1"/><circle fill="#848484" cx="70.8" cy="124" r="1"/><circle fill="#848484" cx="78.1" cy="124" r="1"/><circle fill="#848484" cx="78.1" cy="128.3" r="1"/><circle fill="#848484" cx="83.9" cy="125.4" r="1"/><circle fill="#848484" cx="86.8" cy="131.2" r="1"/><circle fill="#848484" cx="56.3" cy="106.5" r="1"/><circle fill="#848484" cx="50.5" cy="103.6" r="1"/><circle fill="#848484" cx="89.7" cy="126.9" r="1"/><circle fill="#848484" cx="123.1" cy="113.8" r="1"/><circle fill="#848484" cx="117.3" cy="113.8" r="1"/><circle fill="#848484" cx="117.3" cy="119.6" r="1"/><circle fill="#848484" cx="111.5" cy="115.3" r="1"/><circle fill="#848484" cx="110" cy="109.4" r="1"/><circle fill="#848484" cx="105.7" cy="115.3" r="1"/><circle fill="#848484" cx="110" cy="121.1" r="1"/><circle fill="#848484" cx="102.8" cy="121.1" r="1"/><circle fill="#848484" cx="107.1" cy="125.4" r="1"/><circle fill="#848484" cx="99.9" cy="125.4" r="1"/><circle fill="#848484" cx="99.9" cy="129.8" r="1"/><circle fill="#848484" cx="94.1" cy="126.9" r="1"/><circle fill="#848484" cx="91.2" cy="132.7" r="1"/><circle fill="#848484" cx="121.6" cy="108" r="1"/><circle fill="#848484" cx="127.4" cy="105.1" r="1"/><circle fill="#848484" cx="131.8" cy="100.7" r="1"/></g><path opacity="0.6" fill="none" stroke="#6D6D6D" stroke-miterlimit="10" d="M42.8,91c6,25.2,25.4,44.4,48.4,44.4 s42.3-19.2,48.4-44.4"/></g><linearGradient id="SVGID_3_" gradientUnits="userSpaceOnUse" x1="194.9231" y1="116.0217" x2="413.6999" y2="116.0217"><stop  offset="0" style="stop-color:#000000;stop-opacity:0"/><stop  offset="1" style="stop-color:#000000"/></linearGradient><rect x="194.9" y="103.1" fill="url(#SVGID_3_)" width="218.8" height="25.8"/><polygon id="pointerBeard" fill="#E84D4D" points="194,132.4 184.7,152 204.3,152 "/></svg>'
+            $('#beard-icon').append(hardcodedBeard);
+            $('#pointerBeard').css("transform", "translate("+beardPointerValue+"px)");
+
+
+            // Collar for Socio Economic Group !!!!!!!!!!!!!!!!!!!!!!! NEED FIX
+            const collarLeft = (data.soc==0 || (data.soc==4 || data.soc==5 ))?'#F7F7F7" stroke="#515151':((data.soc==1 || data.soc==3)?'#88B9E2':((data.soc==2)?'#265E8C':'none" stroke-dasharray="4 2" stroke="#515151'));
+            const collarRight = (data.soc==0)?'#F7F7F7" stroke="#515151':((data.soc==1 || data.soc==5)?'#88B9E2':((data.soc==2 || (data.soc==3 || data.soc==4))?'#265E8C':'none" stroke-dasharray="4 2" stroke="#515151'));
+            const collarDescLine1 = ["employers, managers &", "lower professionals", "manual, semi-skilled", "two classes are", "two classes are", "two classes are", "neither class is"];
+            const collarDescLine2 = ["higher professionals", "& non-manual workers", "& unskilled workers", "equally presented", "equally presented", "equally presented", "predominant"];
+
+            const hardcodedCollar = '<svg class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" enable-background="new 0 0 448 181" xml:space="preserve"><rect x="0" y="0.5" fill="#F2F2F2" width="448" height="181"/><g><path id="collar_x5F_l_2_" fill="'+collarLeft+'" stroke-miterlimit="10" d="M47.2,110l-8.8,7.4l21.1,35.8L84,127.9 C84,127.9,60.3,127.5,47.2,110z"/><path id="collar_x5F_r_1_" fill="'+collarRight+'" stroke-miterlimit="10" d="M120.3,110l8.8,7.4l-21.1,35.8l-24.4-25.2 C83.5,127.9,107.2,127.5,120.3,110z"/></g><g><rect x="27.3" y="18.7" fill="none" width="383.8" height="54.5"/><text transform="matrix(1 0 0 1 27.2686 36.7081)"><tspan x="0" y="0" fill="#333333" font-size="24">DOMINANT SOCIO-ECONOMIC </tspan><tspan x="0" y="28.8" fill="#333333" font-size="24">GROUP</tspan></text></g><rect x="194" y="106" fill="none" width="187" height="63"/><text transform="matrix(1 0 0 1 194 118.75)"><tspan x="0" y="0" fill="#E84D4D" font-size="17">'+collarDescLine1[data.soc]+'</tspan><tspan x="0" y="20.4" fill="#E84D4D" font-size="17">'+collarDescLine2[data.soc]+'</tspan></text></svg>'
+            $('#collar-icon').append(hardcodedCollar);
+            
+
+            // Shirt for Birthplace Ireland
+            const shirtValue = 'rgb('+ Math.round(((99 * 2.4)+24) - (data.birthPlace*2.4)) +', 109, 44)';
+            const shirtPointerValue = ((data.birthPlace-15)/(84)) * 220;
+            
+            const hardcodedShirt = '<svg class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" enable-background="new 0 0 448 181" xml:space="preserve"><g><rect x="0" y="0.5" fill="#F2F2F2" width="448" height="181"/><g><text transform="matrix(1 0 0 1 26.8418 38.126)"><tspan x="0" y="0" fill="#333333" font-size="24">PERCENTAGE OF PEOPLE BORN</tspan><tspan x="0" y="28.8" fill="#333333" font-size="24">IN IRELAND: </tspan><tspan x="141.3" y="28.8" fill="#E84D4D" font-size="24">'+ Math.round(data.birthPlace) +'%</tspan></text></g><linearGradient id="SVGID_4_" gradientUnits="userSpaceOnUse" x1="194.603" y1="116.9638" x2="413.3798" y2="116.9638"><stop  offset="0" style="stop-color:#E46D2C"/><stop  offset="1" style="stop-color:#186D2C"/></linearGradient><rect x="194.6" y="104.1" fill="url(#SVGID_4_)" width="218.8" height="25.8"/><polygon id="pointerShirt" fill="#E84D4D" points="194.7,134.4 185.3,154 204.9,154 	"/><path id="body_1_" fill="'+shirtValue+'" d="M27,158v-25.4C27,86.4,71.4,92,71.4,92h48.5c0,0,42.1-5.6,42.1,40.6V158H27z"/></g></svg>'  
+            $('#shirt-icon').append(hardcodedShirt);
+            $('#pointerShirt').css("transform", "translate("+shirtPointerValue+"px)");
+
+
+            // Eye Size for Education
+            const eyeValue = 0.21 + data.edu * 0.05;
+            const eyePointerValue = ((data.edu)/(97)) * 220;;
+
+            const hardcodedEye = '<svg class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" enable-background="new 0 0 448 181" xml:space="preserve"><rect x="0.1" y="0" fill="#F2F2F2" width="448" height="181"/><g><g><rect x="26.6" y="23.1" fill="none" width="383.2" height="67.7"/><text transform="matrix(1 0 0 1 26.6464 41.1277)"><tspan x="0" y="0" fill="#333333" font-size="24">PERCENTAGE OF PEOPLE WITH </tspan><tspan x="0" y="28.8" fill="#333333" font-size="24">HIGH EDUCATION:</tspan><tspan x="203.3" y="28.8" fill="#E84D4D" font-size="24"> ' + Math.round(data.edu) + '%</tspan></text></g><g><circle id="eye_x5F_l_28_" fill="#6D6D6D" cx="142.5" cy="123.1" r="1.2"/><circle id="eye_x5F_l_6_" fill="#6D6D6D" cx="168.4" cy="123.1" r="1.4"/><circle id="eye_x5F_l_1_" fill="#6D6D6D" cx="194.9" cy="123.1" r="1.6"/><circle id="eye_x5F_l_7_" fill="#6D6D6D" cx="221.8" cy="123.1" r="1.9"/><circle id="eye_x5F_l_2_" fill="#6D6D6D" cx="249.5" cy="123.1" r="2.3"/><circle id="eye_x5F_l_8_" fill="#6D6D6D" cx="277.9" cy="123.1" r="2.7"/><circle id="eye_x5F_l_3_" fill="#6D6D6D" cx="307.2" cy="123.1" r="3.2"/><circle id="eye_x5F_l_9_" fill="#6D6D6D" cx="337.7" cy="123.1" r="3.7"/><circle id="eye_x5F_l_4_" fill="#6D6D6D" cx="369.3" cy="123.1" r="4.3"/><circle id="eye_x5F_l_5_" fill="#6D6D6D" cx="403.5" cy="123.1" r="5.1"/><polygon id="pointerEye" fill="#E84D4D" points="141.9,136.4 132.5,156 152.1,156 		"/></g><circle id="eye_x5F_l_20_" fill="#6D6D6D" cx="59" cy="123.9" r="'+eyeValue+'"/><circle id="eye_x5F_r_3_" fill="#6D6D6D" cx="85.4" cy="123.9" r="'+eyeValue+'"/></g><ellipse id="Face_14_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-miterlimit="10" cx="71.9" cy="125.9" rx="28.1" ry="34.3"/></svg>'
+            $('#eye-icon').append(hardcodedEye);
+            $('#pointerEye').css("transform", "translate("+eyePointerValue+"px)");
+
+
+            // Eyebag Size for Commute
+            const eyebagValue = data.commuting / 6;
+            const eyebagPointerValue = ((data.commuting)/(30)) * 220;
+
+            const hardcodedEyebag = '<svg class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" enable-background="new 0 0 448 181" xml:space="preserve"> <rect x="0.1" y="0" fill="#F2F2F2" width="448" height="181"/><rect x="0.1" y="0" fill="#F2F2F2" width="448" height="181"/><g><g><rect x="27.5" y="15.4" fill="none" width="375.3" height="71.1"/><text transform="matrix(1 0 0 1 27.4855 33.3819)"><tspan x="0" y="0" fill="#333333" font-size="24">LONG MORNING COMMUTES </tspan><tspan x="0" y="28.8" fill="#333333" font-size="24">INDEX*</tspan></text></g><g><path id="bag_x5F_l_22_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="0.25" stroke-miterlimit="10" d="M159.3,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><path id="bag_x5F_l_21_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="1.5" stroke-miterlimit="10" d="M214.2,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><path id="bag_x5F_l_20_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="2" stroke-miterlimit="10" d="M241.7,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/> <path id="bag_x5F_l_19_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="3.5" stroke-miterlimit="10" d="M324,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><path id="bag_x5F_l_18_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="4" stroke-miterlimit="10" d="M351.4,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><path id="bag_x5F_l_17_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="5" stroke-miterlimit="10" d="M406.3,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><polygon id="pointerEyebag" fill="#E84D4D" points="142.2,136.4 132.8,156 152.4,156 		"/><path id="bag_x5F_l_1_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-miterlimit="10" d="M186.8,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><path id="bag_x5F_l_2_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="2.5" stroke-miterlimit="10" d="M269.1,119.5 c0,4.6-3.9,8.6-8.6,8.6c-4.8,0-8.6-4-8.6-8.6"/><path id="bag_x5F_l_3_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="3" stroke-miterlimit="10" d="M296.5,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/><path id="bag_x5F_l_4_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="4.5" stroke-miterlimit="10" d="M378.8,119.5 c0,4.6-3.9,8.6-8.6,8.6s-8.6-4-8.6-8.6"/></g><path id="bag_x5F_l_16_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="'+eyebagValue+'" stroke-miterlimit="10" d="M65.1,119.8 c0,3.8-3.2,7.1-7.1,7.1s-7.1-3.3-7.1-7.1"/><path id="bag_x5F_r_3_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="'+eyebagValue+'" stroke-miterlimit="10" d="M91.5,119.8 c0,3.8-3.2,7.1-7.1,7.1c-3.9,0-7.1-3.3-7.1-7.1"/></g><ellipse id="Face_14_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-miterlimit="10" cx="71.9" cy="125.9" rx="28.1" ry="34.3"/></svg>'
+            $('#eyebag-icon').append(hardcodedEyebag);
+            $('#pointerEyebag').css("transform", "translate("+eyebagPointerValue+"px)");
+
+
+            // Mouth Shape for Marko Index
+            const posA = ["POPULATION INCRESED!!!!!", "MORE YOUNG POPULATION!!!", "LESS UNEMPLOYED MALES!!!", "LESS UNEMPLOYED FEMALES!", "LESS UNSKILLED WORKERS!!", "LESS UNEDUCATED PEOPLE!!", "MORE EDUCATED PEOPLE!!!", "SHORTER COMMUTES!!!!!!!", "FEELING MORE HEALTHY!!", "FEELING LESS SICK!!!!!", "MORE COMPUTERS!!!!!!!!", "MORE FAST INTERNET!!!!" ];
+            const posB = ["POPULATION DECRESED!!!!!", "MORE OLD POPULATION!!!!!", "MORE UNEMPLOYED MALES!!!", "MORE UNEMPLOYED FEMALES!", "MORE UNSKILLED WORKERS!!", "MORE UNEDUCATED PEOPLE!!", "LESS EDUCATED PEOPLE!!!", "LONG MORNING COMMUTES!!", "FEELING LESS HEALTHY!!", "FEELING MORE SICK!!!!!", "LESS COMPUTERS!!!!!!!!", "LESS FAST INTERNET!!!!" ];
+            const mouthValue = ((data.mar_index>-0.1) && (data.mar_index<0.1))?"NOT MUCH HAS CHANGED..":((data.mar_index>0.1)?posA[data.mar_factor]:posB[data.mar_factor]); ///CHECK IT WHEN CONCENTRATED!
+
+
+
+            const hardcodedMouth = '<svg class="bold-letters" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg" x="0px" y="0px" viewBox="'+ viewBox +'" enable-background="new 0 0 448 181" xml:space="preserve"> <rect x="0.1" y="0" fill="#F2F2F2" width="448" height="181"/> <rect x="0.1" y="0" fill="#F2F2F2" width="448" height="181"/> <rect x="-0.5" y="0" fill="#F2F2F2" width="448" height="181"/><g><g><rect x="26.8" y="14.7" fill="none" width="384.3" height="73.9"/><text transform="matrix(1 0 0 1 26.772 32.6791)" fill="#333333" font-size="24">FIVE-YEAR CHANGE*</text></g><path id="mouth_13_" opacity="0.6" fill="#6D6D6D" d="M86.6,138c0,7-6.1,13.7-13.7,13.7c-7.6,0-13.7-6.7-13.7-13.7H86.6z"/></g><ellipse id="Face_14_" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-miterlimit="10" cx="71.9" cy="125.9" rx="28.1" ry="34.3"/><text transform="matrix(1 0 0 1 162.3332 101.0003)" fill="#E84D4D" font-size="12">'+mouthValue+'</text><path fill="none" stroke="#606060" stroke-miterlimit="10" d="M325.2,66.5H151.8c-5.4,0-10.3,4.6-10.3,9.9v15.9l-30.7,28l30.7-14.5 v10.1c0,5.4,4.9,9.6,10.3,9.6h173.5c5.4,0,9.3-4.2,9.3-9.6V76.4C334.5,71.1,330.6,66.5,325.2,66.5z"/></svg>'
+            $('#mouth-icon').append(hardcodedMouth);
+
+            //console.log(data.mar_factor);
+
+        });
+    </script>
+
+</head>
+
+<body>
+
+    <div id="main">
+        <div id="doubleBlock">
+            <div id="title-cont">
+                <div id="title-prefix" class="bold-letters">Data for</div>
+                <div id="title-location">Montjoy B</div>
+            </div>
+            <div id="icon-con"></div>
+        </div>
+
+        <div id="hairBlock" class="">
+            <!-- <div id="age-title" class="bold-letters block-title">AVERAGE AGE: <span id="age-data">30</span><span>%</span></div> -->
+            <div id="hair-icon" class="body-part"></div>
+        </div>
+
+        <div id="cheekBlock" class="">
+            <div id="cheek-icon" class="body-part"></div>
+        </div>
+
+        <div id="beardBlock" class="">
+            <div id="beard-icon" class="body-part"></div>
+        </div>
+
+        <div id="collarBlock" class="">
+            <div id="collar-icon" class="body-part"></div>
+        </div>
+
+        <div id="shirtBlock" class="">
+            <div id="shirt-icon" class="body-part"></div>
+        </div>
+
+        <div id="eyeBlock" class="">
+            <div id="eye-icon" class="body-part"></div>
+        </div>
+
+        <div id="eyebagBlock" class="">
+            <div id="eyebag-icon" class="body-part"></div>
+        </div>
+
+        <div id="mouthBlock" class="">
+            <div id="mouth-icon" class="body-part"></div>
+        </div>
+    </div>
+
+    <script>
+        function iconGenerator(name, population, age, birthPlace, unemp, soc, edu, commuting, health, mar_index, id, number_joins){
+            
+            //temp
+            const educationValue =  0.21 + edu * 0.05;
+            const unemploymentValue = 1 + (Math.log((unemp / 42)+0.3));
+            const haircolorValue = 'rgb('+ (age-20) *(277/73) +', '+ (age-20)*(277/73) +', '+ (age-20)*(277/73) +')';
+            const eyeBagsScale = (edu <40)?1:((edu>59)?1.55:((edu*2.65)/100));
+            const eyeBagsValue = commuting / 6;
+            const number_text = (number_joins>0)?number_joins:"";
+            const center_text = 54.4978 - (2.5019 * number_joins.toString().length);
+            const healthValue = (health>=80)?(((health-80)/(100-(health-80))) * 100) * 0.04:1 - ((((health-45)/(100-(health-45))) * 100) * 0.02);
+            const healthColor = (health>=80)?'#F4A2BC':'#7FFF80';
+
+            const val_r = 2.4;
+            const val_g = 1.13;
+            const val_b = 1.9;
+
+            const bodycolorValue = 'rgb('+ Math.round(((99 * val_r)+24) - (birthPlace*val_r)) +', 109, 44)';
+
+            const collarLeft = (soc==0 || (soc==4 || soc==5 ))?'#F7F7F7':((soc==1 || soc==3)?'#88B9E2':((soc==2)?'#265E8C':'none" stroke-dasharray="4 2" stroke="#515151'));
+            const collarRight = (soc==0)?'#F7F7F7':((soc==1 || soc==5)?'#88B9E2':((soc==2 || (soc==3 || soc==4))?'#265E8C':'none" stroke-dasharray="4 2" stroke="#515151'));
+
+            const collar_colors = ["#F7F7F7", "#88B9E2", "#265E8C"];
+
+            const svg = '<svg id="'+ id + '" class="picto" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 114 131.3" enable-background="new 0 0 114 131.3" xml:space="preserve">';
+
+            const body = '<path id="body" fill="'+bodycolorValue+'" d="M10.8,121v-16.9c0-32,30.1-28.1,30.1-28.1h33.6c0,0,29.3-3.9,29.3,28.1V121H10.8z"/>';
+
+            const collar = '<g id="collar"><path fill="'+collarLeft+'" d="M38.9,71l-4.4,3.7L45,92.4l12.1-12.5C57.1,79.9,45.4,79.7,38.9,71z"/><path fill="'+collarRight+'" d="M75.1,71l4.4,3.7L69,92.4L56.9,79.9C56.9,79.9,68.6,79.7,75.1,71z"/></g>';
+
+            const face = '<ellipse id="Face_11_" fill="#E5D6BD" cx="57" cy="47.5" rx="26.9" ry="32.8"/>';
+
+            const cheeks = '<g id="cheeks"><ellipse id="cheek_l" transform="matrix(0.9643 0.2647 -0.2647 0.9643 16.5147 -8.7475)" opacity="'+ healthValue + '" fill="' + healthColor + '" cx="40.7" cy="56.9" rx="7.3" ry="6.2"/> <ellipse id="cheek_r" transform="matrix(-0.9643 0.2647 -0.2647 -0.9643 159.014 92.3913)" opacity="' + healthValue + '" fill="' + healthColor + '" cx="73.3" cy="56.9" rx="7.3" ry="6.2"/></g>';
+
+            const beard = '<g id="beard" opacity="'+ unemploymentValue +'"><circle fill="#848484" cx="37.6" cy="68.4" r="0.5"/><circle fill="#848484" cx="40.7" cy="68.4" r="0.5"/><circle fill="#848484" cx="40.7" cy="71.5" r="0.5"/><circle fill="#848484" cx="43.8" cy="69.2" r="0.5"/><circle fill="#848484" cx="44.6" cy="66.1" r="0.5"/><circle fill="#848484" cx="46.9" cy="69.2" r="0.5"/><circle fill="#848484" cx="44.6" cy="72.3" r="0.5"/><circle fill="#848484" cx="48.5" cy="72.3" r="0.5"/><circle fill="#848484" cx="46.1" cy="74.6" r="0.5"/><circle fill="#848484" cx="50" cy="74.6" r="0.5"/><circle fill="#848484" cx="50" cy="76.9" r="0.5"/><circle fill="#848484" cx="53.1" cy="75.4" r="0.5"/><circle fill="#848484" cx="54.7" cy="78.5" r="0.5"/><circle fill="#848484" cx="38.4" cy="65.3" r="0.5"/><circle fill="#848484" cx="35.3" cy="63.7" r="0.5"/><circle fill="#848484" cx="56.2" cy="76.1" r="0.5"/><circle fill="#848484" cx="74.1" cy="69.2" r="0.5"/><circle fill="#848484" cx="71" cy="69.2" r="0.5"/><circle fill="#848484" cx="71" cy="72.3" r="0.5"/><circle fill="#848484" cx="67.9" cy="69.9" r="0.5"/><circle fill="#848484" cx="67.1" cy="66.8" r="0.5"/><circle fill="#848484" cx="64.8" cy="69.9" r="0.5"/><circle fill="#848484" cx="67.1" cy="73" r="0.5"/><circle fill="#848484" cx="63.2" cy="73" r="0.5"/><circle fill="#848484" cx="65.5" cy="75.4" r="0.5"/><circle fill="#848484" cx="61.7" cy="75.4" r="0.5"/><circle fill="#848484" cx="61.7" cy="77.7" r="0.5"/><circle fill="#848484" cx="58.6" cy="76.1" r="0.5"/><circle fill="#848484" cx="57" cy="79.2" r="0.5"/><circle fill="#848484" cx="73.3" cy="66.1" r="0.5"/><circle fill="#848484" cx="76.4" cy="64.5" r="0.5"/><circle fill="#848484" cx="78.7" cy="62.2" r="0.5"/></g>';
+
+            const eyes = '<g id="eyes"><circle id="eye_l" fill="#6D6D6D" stroke="#E5D6BD" cx="47.3" cy="47.5" r="'+ educationValue +'"/><circle id="eye_r" fill="#6D6D6D" stroke="#E5D6BD" cx="66.7" cy="47.5" r="'+ educationValue +'"/></g>';
+
+            const eyeBags = '<g id="eyeBags"><path transform="scale(' + eyeBagsScale + ')" transform-origin="47.3px 47.5px" id="bag_l" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="' + eyeBagsValue + '" stroke-miterlimit="10" d="M51.1,47.3 c0,2-1.7,3.8-3.8,3.8s-3.8-1.8-3.8-3.8"/> <path transform="scale(' + eyeBagsScale + ')" transform-origin="66.7px 47.5px" id="bag_r" opacity="0.6" fill="none" stroke="#6D6D6D" stroke-width="' + eyeBagsValue + '" stroke-miterlimit="10" d="M70.5,47.3 c0,2-1.7,3.8-3.8,3.8c-2.1,0-3.8-1.8-3.8-3.8"/></g>';
+
+            const mouth_smile = '<path transform="scale(1,'+mar_index+')" transform-origin="57px 71px" id="mouth" fill="#6D6D6D" d="M65.8,65c0,4-3.9,8.8-8.8,8.8S48.2,69,48.2,65H65.8z"/>';
+
+            const mouth_line = '<path id="mouth" opacity="0.6" stroke-width="0.8" fill="#6D6D6D" stroke="#231F20" stroke-miterlimit="10" d="M64.1,70.5H49.3H64.1z"/>'
+
+            const hair = '<path id="hair" fill="'+ haircolorValue +'" d="M42.8,28.9c0,0,8.3,5.5,14.2,7.3c5.9,1.7,16.4,4.1,19.5,5.6c3,1.5,4.6,4,5.5,7c1,3.2,1.1,6.3,1.1,6.3 s2.6-3.2,3.4-8.9c1.1-8,2.4-28.3-16-34.3s-27.6,3.6-27.6,3.6s-8.3-0.8-13.4,10.6c-2.8,6.3-3,11.7-2.3,18c0.7,6.1,3.5,10.4,3.5,10.4 S34.5,35.8,42.8,28.9z"/>';
+
+            const background = '<path id="joined" fill="#D3F935" d="M0.8,131v-26.9c0-18.6,8.7-31.5,23.8-36.3c-1.4-3-2.5-6.2-3.2-9.5c-1.3-2.5-3.3-7-4-12.9 c-0.7-6.4-0.9-14.3,3.1-23.3C25,11.8,32.5,7.1,39,5.9C42.7,3.3,49.4,0,58.9,0c4.7,0,9.7,0.8,14.7,2.5c17.7,5.7,26,22.2,22.8,45.2 c-0.7,5.2-2.5,9.1-3.9,11.4c-0.7,3-1.7,5.9-3,8.6c13,4,24.2,15,24.2,36.4V131H0.8z"/>';
+
+            const text = '<text id="number" transform="matrix(1 0 0 1 ' + center_text + ' 128.75)" fill="#383838" font-size="9">' + number_text + '</text>';
+
+            const joins = (number_joins>0)?background:"";
+            const mouth_gen = ((mar_index<-0.01)||(mar_index>0.01))?mouth_smile:mouth_line;
+            
+            //console.log(mar_index);
+
+            var el = document.createElement('div');
+            el.innerHTML = svg + joins + text + body + collar + face + cheeks + beard + eyes + eyeBags + mouth_gen + hair + '</svg>';
+            return el.firstChild;
+        }
+    </script>
+
+</body>
+</html>
